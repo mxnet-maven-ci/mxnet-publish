@@ -1,2 +1,3 @@
-# mxnet-publish
-Repo for automatic publishing of mxnet
+# mxnet publish
+
+Repo for automatic publishing of mxnet osx
