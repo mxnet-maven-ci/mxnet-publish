@@ -1,40 +1,39 @@
+cache:
+  timeout: 1500
+  directories:
+  - staticdeps
+  - lib
 sudo: required
+before_install:
+- |
+  if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+    travis_wait rvm get head --auto-dotfiles;
+    travis_wait brew update;
+    travis_wait brew install openssl
+    travis_wait brew install gnupg@1.4
+    export PATH=/usr/local/opt/gnupg@1.4/libexec/gpgbin:$PATH
+    travis_wait brew install automake
+    travis_wait brew install pkg-config
+    travis_wait brew install nasm
+    travis_wait brew install maven
+    python --version
+    if [[ -z $(command -v pip) ]]; then
+      travis_wait curl -L -O https://bootstrap.pypa.io/get-pip.py
+      travis_wait python get-pip.py
+    fi
+    pip --version
+  fi
+  # - export GPG_TTY=$(tty) && gpg --batch --import apache.gpg
+install: |
+  travis_wait sudo -H pip install -U pip "setuptools==36.2.0" wheel pypandoc twine nose numpy mock
+
 os: osx
-
-language: generic
 osx_image: xcode8
+language: generic
+env: mxnet_variant=cpu CACHE_NAME=cpu MAVEN_PUBLISH_OS_TYPE=osx-x86_64-cpu
 
-env: MAVEN_PUBLISH_OS_TYPE=osx-x86_64-cpu mxnet_variant=cpu
-
-# addons:
-# homebrew:
-# update: true
-# packages:
-# - pkg-config
-# - graphviz
-# - pyenv
-# - coreutils
-# - openssl
-# - gnupg@1.4
-# - automake
-# - opencv
-# - nasm
- 
-before_install: |
-  travis_wait rvm get head --auto-dotfiles;
-  travis_wait brew update;
-  travis_wait brew install openssl
-  travis_wait brew install gnupg@1.4
-  export PATH=/usr/local/opt/gnupg@1.4/libexec/gpgbin:$PATH
-  travis_wait brew install automake
-  travis_wait brew install pkg-config
-  travis_wait brew install nasm
-  # travis_wait brew install maven
-
-
-script:
-  - git clone https://github.com/zachgk/incubator-mxnet -b automate-maven
-  - cd incubator-mxnet
-  - git rev-parse HEAD
-  - ./ci/publish/scala/fullDeploy.sh
-
+script: |
+  git clone https://github.com/zachgk/incubator-mxnet -b automate-maven
+  cd incubator-mxnet
+  git rev-parse HEAD
+  travis_wait 100 ./ci/publish/scala/fullDeploy.sh
